@@ -64,7 +64,31 @@ color_schemes = {
     "🥇 Copper vs 🌊 Ocean": ("copper", "ocean"),
     "🟡 Wistia vs ❄️ Winter": ("Wistia", "winter"),
     "💎 Blues vs YlOrBr": ("Blues_r", "YlOrBr_r"),
-    "💖 Pink vs YlGnBu": ("pink", "YlGnBu"),
+    "💖 Pink vs YlGnBu": ("pink", "YlGnBu"),    
+	"⚫ Greys vs 🔲 Binary": ("Greys", "binary"),
+    "🌫️ GistYarg vs Bone": ("gist_yarg", "bone"),
+    "🧊 Ice vs 🏜️ Copper": ("icefire", "copper_r"),
+    "🔥 YlOrRd vs OrRd": ("YlOrRd", "OrRd"),
+    "🌊 Blues vs PuBuGn": ("Blues", "PuBuGn"),
+    "🍃 YlGn vs GnBu": ("YlGn", "GnBu"),
+    "🪐 Twilight vs Twilight Shifted": ("twilight", "twilight_shifted"),
+    "🌈 HSV vs Rainbow": ("hsv", "rainbow"),
+    "🌪️ GistEarth vs Terrain": ("gist_earth", "terrain"),
+    "🖤 Cubehelix vs Greys": ("cubehelix", "Greys"),
+    "🌌 Plasma vs Inferno": ("plasma", "inferno"),
+    "🍭 Pastel2 vs Set3": ("Pastel2", "Set3"),
+    "🎨 Dark2 vs Accent": ("Dark2", "Accent"),
+    "🎆 Flag vs Prism": ("flag", "prism"),
+    "🕹️ NipYlGn vs NipYlGnBu": ("nipy_spectral", "Spectral"),
+    "🍇 PuRd vs RdPu": ("PuRd", "RdPu"),
+    "🍂 Oranges vs YlOrBr": ("Oranges", "YlOrBr"),
+    "🌾 Summer vs Winter": ("summer", "winter"),
+    "☀️ Autumn vs Spring": ("autumn", "spring"),
+    "🌊 Ocean vs 🌍 Earth": ("ocean", "earth"),
+    "🧿 BuPu vs Purples": ("BuPu", "Purples"),
+    "🌀 Jet vs GistRainbow": ("jet", "gist_rainbow"),
+    "📊 Tab20b vs Tab20c": ("tab20b", "tab20c"),
+    "🌄 Terrain vs GistEarth": ("terrain", "gist_earth"),
 }
 
 # 🔧 Contrast text
@@ -261,5 +285,6 @@ if uploaded_file:
             col1.metric("💥 Overall Boundary %", f"{overall_boundary_pct:.1f}%")
             col2.metric("⚡ Overall SR", f"{overall_sr:.1f}")
             col3.metric("🎯 Overall Control %", f"{overall_control_pct:.1f}%")
+
 
 
