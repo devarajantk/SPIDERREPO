@@ -98,7 +98,7 @@ if uploaded_file:
         batsmen = df['batsmanName'].dropna().unique()
         batsman = st.selectbox("Select Batsman", sorted(batsmen))
         df_bat = df[df['batsmanName'] == batsman].copy()
-        df_bat = df_bat[df_bat["wagonZone"] != 0]
+        
 
         if df_bat.empty:
             st.warning(f"No valid wagon data for {batsman}.")
@@ -113,34 +113,31 @@ if uploaded_file:
             zone_pct_runs = (zone_runs / total_runs * 100).replace([np.inf, np.nan], 0)
 
             zone_stats = (
-                df_bat.groupby("wagonZone")
-                .agg(
-                    runs=('batsmanRuns', 'sum'),
-                    balls=('ballNumber', 'count'),
-                    fours=('isFour', 'sum'),
-                    sixes=('isSix', 'sum'),
-                    controlled=('shotControl', lambda x: (x == 1).sum()),
-                    valid_shots=('shotControl', lambda x: x.notna().sum())
-                )
-                .reset_index()
-            )
+    			df_bat.groupby("wagonZone")
+    			.agg(
+        		runs=('batsmanRuns', 'sum'),
+        		balls=('ballNumber', 'count'),
+        		fours=('isFour', 'sum'),
+        		sixes=('isSix', 'sum'),
+        		controlled=('shotControl', lambda x: (x == 1).sum()),
+        		wide_controlled=('shotControl', lambda x: ((x == 1) & (df_bat.loc[x.index, "wides"] == 1)).sum()),
+    	    )
+             .reindex(range(1, 9), fill_value=0)
+    	     .reset_index()
+	    )
             zone_stats["sr"] = (zone_stats["runs"] / zone_stats["balls"] * 100).replace([np.inf, np.nan], 0)
             zone_stats["boundary_balls"] = zone_stats["fours"] + zone_stats["sixes"]
             zone_stats["boundary %"] = (zone_stats["boundary_balls"] / zone_stats["balls"] * 100).replace([np.inf, np.nan], 0)
-            zone_stats["control %"] = (zone_stats["controlled"] / zone_stats["valid_shots"] * 100).replace([np.inf, np.nan], 0)
+            zone_stats["adjusted_control"] = zone_stats["controlled"] - zone_stats["wide_controlled"]
+            zone_stats["control %"] = (zone_stats["adjusted_control"] / zone_stats["balls"] * 100).replace([np.inf, np.nan], 0)
 
             labels_rh = ["Fine Leg", "Behind Sq Leg", "In front Sq Leg", "Mid Wicket",
                          "Straight/Mid Off", "Cover", "Backward Point", "Third Man"]
             labels = labels_rh if not is_left else labels_rh[::-1]
             zone_name_map = dict(zip(range(1, 9), labels))
 
-            metric_options = {
-                "% of Runs": zone_pct_runs,
-                "Strike Rate": zone_stats.set_index("wagonZone")["sr"],
-                "Boundary %": zone_stats.set_index("wagonZone")["boundary %"],
-                "Control %": zone_stats.set_index("wagonZone")["control %"]
-            }
-
+            valid_zones = range(1, 9)
+            metric_options = {"% of Runs": zone_pct_runs.reindex(valid_zones, fill_value=0),"Strike Rate": zone_stats.set_index("wagonZone")["sr"].reindex(valid_zones, fill_value=0),"Boundary %": zone_stats.set_index("wagonZone")["boundary %"].reindex(valid_zones, fill_value=0),"Control %": zone_stats.set_index("wagonZone")["control %"].reindex(valid_zones, fill_value=0)}
             plot_choice = st.sidebar.selectbox("📊 Select Metric for Wagon Wheel", list(metric_options.keys()))
             zone_vals = metric_options[plot_choice]
 
@@ -213,7 +210,7 @@ if uploaded_file:
 
             # ===== TABLES =====
             st.subheader("📊 Zone Contributions (% of Runs)")
-            zone_df = zone_pct_runs.reset_index()
+            zone_df = zone_pct_runs.reindex(valid_zones, fill_value=0).reset_index()
             zone_df.columns = ["wagonZone", "% of Runs"]
             zone_df["Zone"] = zone_df["wagonZone"].map(zone_name_map)
             st.dataframe(zone_df[["Zone", "% of Runs"]].round(1))
@@ -233,8 +230,31 @@ if uploaded_file:
             # ===== SUMMARY =====
             overall_sr = (df_bat["batsmanRuns"].sum() / df_bat.shape[0] * 100) if df_bat.shape[0] > 0 else 0
             overall_boundary_pct = ((df_bat["isFour"].sum() + df_bat["isSix"].sum()) / df_bat.shape[0] * 100) if df_bat.shape[0] > 0 else 0
-            valid_shots_all = df_bat["shotControl"].notna().sum()
-            overall_control_pct = ((df_bat["shotControl"] == 1).sum() / valid_shots_all * 100) if valid_shots_all > 0 else 0
+
+# Use the original df (uploaded file) for overall control %, ignore wagonZone filter
+            df_full = df[df['batsmanName'] == batsman].copy()
+            df_full["wides"] = df_full["wides"].fillna(0)
+            df_full["noballs"] = df_full["noballs"].fillna(0)
+            df_full["shotControl"] = df_full["shotControl"].fillna(0)
+
+# Count only valid balls (excluding wides)
+            df_full["shotControl"] = pd.to_numeric(df_full["shotControl"], errors='coerce').fillna(0).astype(int)
+            df_full["wides"] = pd.to_numeric(df_full["wides"], errors='coerce').fillna(0).astype(int)
+            df_full["noballs"] = pd.to_numeric(df_full["noballs"], errors='coerce').fillna(0).astype(int)
+            
+            controlled_balls = (df_full["shotControl"] == 1).sum()
+
+# Subtract cases where it's a wide AND shotControl==1
+            wide_controlled = ((df_full["shotControl"] == 1) & (df_full["wides"] == 1)).sum()
+
+# Adjusted controlled balls
+            adjusted_controlled = controlled_balls - wide_controlled
+
+# Total valid balls (still counting wides)
+            total_valid_balls = len(df_full)
+
+# Control percentage
+            overall_control_pct = adjusted_controlled / total_valid_balls * 100
 
             st.subheader("📌 Overall Batting Metrics")
             col1, col2, col3 = st.columns(3)
