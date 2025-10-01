@@ -248,7 +248,7 @@ if uploaded_file:
             wide_controlled = ((df_full["shotControl"] == 1) & (df_full["wides"] == 1)).sum()
 
 # Adjusted controlled balls
-            adjusted_controlled = controlled_balls - wide_controlled
+            adjusted_controlled = controlled_balls 
 
 # Total valid balls (still counting wides)
             total_valid_balls = len(df_full)
@@ -261,3 +261,4 @@ if uploaded_file:
             col1.metric("💥 Overall Boundary %", f"{overall_boundary_pct:.1f}%")
             col2.metric("⚡ Overall SR", f"{overall_sr:.1f}")
             col3.metric("🎯 Overall Control %", f"{overall_control_pct:.1f}%")
+
