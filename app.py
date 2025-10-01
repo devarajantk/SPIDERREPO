@@ -128,7 +128,7 @@ if uploaded_file:
             zone_stats["sr"] = (zone_stats["runs"] / zone_stats["balls"] * 100).replace([np.inf, np.nan], 0)
             zone_stats["boundary_balls"] = zone_stats["fours"] + zone_stats["sixes"]
             zone_stats["boundary %"] = (zone_stats["boundary_balls"] / zone_stats["balls"] * 100).replace([np.inf, np.nan], 0)
-            zone_stats["adjusted_control"] = zone_stats["controlled"] - zone_stats["wide_controlled"]
+            zone_stats["adjusted_control"] = zone_stats["controlled"] 
             zone_stats["control %"] = (zone_stats["adjusted_control"] / zone_stats["balls"] * 100).replace([np.inf, np.nan], 0)
 
             labels_rh = ["Fine Leg", "Behind Sq Leg", "In front Sq Leg", "Mid Wicket",
@@ -261,4 +261,5 @@ if uploaded_file:
             col1.metric("💥 Overall Boundary %", f"{overall_boundary_pct:.1f}%")
             col2.metric("⚡ Overall SR", f"{overall_sr:.1f}")
             col3.metric("🎯 Overall Control %", f"{overall_control_pct:.1f}%")
+
 
